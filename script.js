@@ -1,187 +1,195 @@
+const form = document.querySelector(".form");
+const formInput = form.querySelectorAll(".form__input");
 
-const cardholder = document.getElementById("cardholder-name");
-const cardNumber = document.getElementById("card-number");
-const expiry = Array.from(document.querySelectorAll(".expiry"));
-const cvc = document.getElementById("cvc");
-const submit = document.getElementById("submit");
-const nameOnCard = document.querySelector(".cardholder-display");
-const numOnCard = document.querySelector(".card-number-display");
-const expMM = document.querySelector(".expiry-month-display");
-const expYY = document.querySelector(".expiry-year-display");
-const ccDisplay = document.querySelector(".cvc-display");
-const thankYou = document.getElementById("thank-you-header");
-const thankYouSection = document.getElementById("thank-you");
-const continueBtn = document.getElementById("continue");
-const form = document.getElementById("myForm");
-const expiryErrorMsg = document.getElementById("expiry-error");
+const cardNumber = document.querySelector(".card__number");
+const cardPerson = document.querySelector(".card__person");
+const cardMonth = document.querySelector(".card__date--month");
+const cardYear = document.querySelector(".card__date--year");
+const cardPin = document.querySelector(".card__pin");
 
+const inputName = document.querySelector("#name");
+const inputNumber = document.querySelector("#number");
+const inputDate = document.querySelectorAll("#date");
+const inputPin = document.querySelector("#pin");
 
+const btnSubmit = document.querySelector("#btn-submit");
+const formWrapper = document.querySelector(".wrapper");
+const completeState = document.querySelector(".complete");
 
-
-function inputCardNum(){
-    let cardNumberIdnput= cardNumber.value;
-    //dont allow users to write 
-    let formattedCardNumber= cardNumberIdnput . replace (/[^\d]/g, "")
-    formattedCardNumber= formattedCardNumber . substring(0,16);
-
-    let cardNumberSections = formattedCardNumber.match (/\d{1,4}/g);
-    if (cardNumberSections !==null){
-        formattedCardNumber= cardNumberSections.join(" ");
-    }
-    if(cardNumberIdnput !== formattedCardNumber){
-        cardNumber. value = formattedCardNumber;
-    }
-
-    numOnCard.innerHTML = cardNumber . value;
-    if(cardNumber. value === ""){
-        numOnCard.innerHTML= cardNumber.Placeholder;
-    }
+function checkName() {
+  let valid = false;
+  const name = inputName.value;
+  if (!name) {
+    showError(inputName, "Can't be blank.");
+    cardPerson.innerHTML = "Eric Choo";
+  } else if (!isAlphabet(name)) {
+    showError(inputName, "Wrong format");
+  } else {
+    showSuccess(inputName);
+    cardPerson.innerHTML = name;
+    valid = true;
+  }
+  return valid;
 }
 
+function checkNumber() {
+  let valid = false;
 
-
-function inputMM(){
-    let formattedMM= expiry[0]. value;
-    formattedMM = formattedMM. substring(0,2);
-    expiry[0].value= formattedMM;
-    if(expiry[0]. value===""){
-        expMM.innerHTML= expiry[0].value;
-    }
-
+  const number = inputNumber.value;
+  if (!number) {
+    showError(inputNumber, "Can't be blank.");
+    cardNumber.innerHTML = "0000 0000 0000 0000";
+  } else if (!isNumber(number)) {
+    showError(inputNumber, "Wrong format, numbers only.");
+  } else {
+    showSuccess(inputNumber);
+    cardNumber.innerHTML = formatNumber(number, 16);
+    valid = true;
+  }
+  return valid;
 }
 
-function inputYY(){
-    let formattedYY=expiry [1].value;
-    formattedYY=formattedYY.substring(0,4);
-    expiry[1].value = formattedYY;
-    if (expiry[1] .value ===""){
-        expYY.innerHTML=expiry[1]. value;
-    }
+function checkDate() {
+  let valid = false;
+  const [month, year] = inputDate;
+
+  if (month.value > 12 || month.value < 0) {
+    showError(month, "Only 12 months in a year");
+  } else if (!month.value && !year.value) {
+    showError(month, "Can't be blank.");
+    showError(year, "Can't be blank.");
+    cardMonth.innerHTML = "00";
+    cardYear.innerHTML = "00";
+  } else if (month.value && !year.value) {
+    showError(year, "Can't be blank.");
+    cardMonth.innerHTML = formatNumber(month.value, 2);
+    cardYear.innerHTML = "00";
+  } else if (!month.value && year.value) {
+    showError(month, "Can't be blank.");
+    cardYear.innerHTML = formatNumber(year.value, 2);
+    cardMonth.innerHTML = "00";
+  } else if (!isNumber(month.value) && isNumber(year.value)) {
+    showSuccess(year);
+    showError(month, "Wrong format, numbers only.");
+  } else if (isNumber(month.value) && !isNumber(year.value)) {
+    showSuccess(month);
+    showError(year, "Wrong format, numbers only.");
+  } else if (!isNumber(month.value) && !isNumber(year.value)) {
+    showError(month, "Wrong format, numbers only.");
+    showError(year, "Wrong format, numbers only.");
+  } else {
+    showSuccess(month);
+    showSuccess(year);
+    cardMonth.innerHTML = month.value;
+    cardYear.innerHTML = year.value;
+    cardMonth.innerHTML = formatNumber(month.value, 2);
+    cardYear.innerHTML = formatNumber(year.value, 2);
+    valid = true;
+  }
+  return valid;
 }
 
+function checkPin() {
+  let valid = false;
 
-function inputCvc() {
-    let formattedCvc = cvc.value;
-    formattedCvc = formattedCvc.substring(0, 3); 
-    cvc.value = formattedCvc;
-
-    if (cvc.value === "") {
-        cvcDisplay.innerHTML = "000"; 
-    } else {
-        cvcDisplay.innerHTML = cvc.value;
-    }
+  const pin = inputPin.value;
+  if (!pin) {
+    showError(inputPin, "Can't be blank.");
+    cardPin.innerHTML = "000";
+  } else if (!isNumber(pin)) {
+    showError(inputPin, "Wrong format, numbers only.");
+  } else {
+    showSuccess(inputPin);
+    cardPin.innerHTML = formatNumber(pin, 3);
+    valid = true;
+  }
+  return valid;
 }
 
-function massValidate() {
-function validateName() {
-    let cardholderExp = /^[A-Z a-z]+$/; 
-    let errorMsg = document.getElementById("errorMsg");
-
-    if (cardholder.value.match(cardholderExp)) {
-        errorMsg.textContent = ""; 
-    } else {
-        errorMsg.innerHTML = "Please enter a valid cardholder name."; 
-    }
-}
-function validateCard(){
-
-    let cardNumError =document. getElementById("card-num-error");
-    if(cardNumber.value.length> 0 && cardNumber . value.length<16){
-        cardNumError.innerHTML="Wrong format!";
-    }
-    else if (cardNumber.value==" "){
-        cardNumError.innerHTML = "can`t be blank";
-    }
-    else {
-        cardNumError.innerHTML="";
-    }
-}
-function validateExpiry() {
-    let expMonth = /^(0[0-9]|1[1-2]){2}$/; 
-    let expYear = /^[0-9] [0-2]{4}$/; 
-    if (expiry[0].value.match(expMonth)) {
-        expiryErrorMsg.innerHTML = ""; 
-    } else if( expiry[0].value.match(expMonth) && 
-               expiry[1].value.match(expYear) 
-    ){
-        expiryErrorMsg.innerHTML = ""; 
-    } else if (expiry[0].value === "") {
-        expiryErrorMsg.innerHTML = "Can't be blank!"; 
-    } else {
-        expiryErrorMsg.innerHTML = "Wrong format!"; 
-    }
-}
-function validateCvc(){
-let cvcErrorMsg =document.getElementById("error-cvc");
-let cvcExp= /^[0-9]{3}&/;
-if(cvc.value ===""){
-    cvcErrorMsg.innerHTML="Cant be blank";
-} else if (cvc.value.match (cvcExp)) {
-    cvcErrorMsg.innerHTML="";
-}else{
-    cvcErrorMsg.innerHTML="Wrong format";
-
+function showError(input, message) {
+  const invalid = input.closest(".form__item").querySelector(".invalid");
+  
+  input.style.border = "1px solid red";
+  invalid.innerHTML = message;
 }
 
+function showSuccess(input) {
+  const invalid = input.closest(".form__item").querySelector(".invalid");
+ 
+  input.style.background = `linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(to right,rgb(100, 72, 254), rgb(96, 5, 148)) border-box`;
+  input.style.border = "1px solid transparent";
+  invalid.innerHTML = "";
 }
 
-validateCard();
-validateName();
-validateExpiry();
-validateCvc();
- if(
-    
-    nameOnCard.innerHTML== cardholder.Placeholder ||
-    numOnCard.innerHTML== cardNumber.Placeholder||
-    expMM.innerHTML== "00"||
-    expYY.innerHTML=="0000"||
-    cvcDisplay.innerHTML=="000"||
-    (cardNumber.value.length> 0 && cardNumber.value.length<16)
-    
-    ){
-        return false;
+function isAlphabet(str) {
+  let char = str.split("");
 
-    }else{
-        return true;
-    }
-    
-
-
-
-
-
- }
-
-submit.addEventListener("click",function(){
-    massValidate();
-    if(massValidate()==false){
-        event.preventDefault();
-    } else {
-        event.preventDefault();
-        form.classList.add("hidden");
-        thankYouSection.classList.remove("hidden");
-    }
+  if (
+    char.some(
+      (c) =>
+        c.charCodeAt() < 65 &&
+        c.charCodeAt() != 32 &&
+        c.charCodeAt() != 39 &&
+        c.charCodeAt() != 47
+    )
+  ) {
+    return false;
+  } else if (
+    char.some(
+      (c) => c.charCodeAt() > 90 && c.charCodeAt() < 97 && c.charCodeAt() > 122
+    )
+  ) {
+    return false;
+  }
+  return true;
 }
 
-);
+function isNumber(str) {
+  let char = str.split("");
 
-continueBtn.addEventListener("click", function (event) {
-    event.preventDefault(); 
+  if (char.some((c) => c.charCodeAt() < 48 || c.charCodeAt() > 57))
+    return false;
+  return true;
+}
 
-    thankYouSection.classList.add("hidden");
-    form.classList.remove("hidden");
+function formatNumber(str, len) {
+  str = str + "0".repeat(len - str.length);
+  let arr = [];
+  for (let i = 0; i <= str.length; i += 4) {
+    arr.push(str.slice(i, i + 4));
+  }
+  return arr.join(" ");
+}
 
-    nameOnCard.innerHTML = cardholder.placeholder;
-    numOnCard.innerHTML = cardNumber.placeholder;
-    expMM.innerHTML = "00";
-    expYY.innerHTML = "0000";
-    cvcDisplay.innerHTML = "000";
+form.addEventListener("input", (e) => {
+  switch (e.target.id) {
+    case "name":
+      checkName();
+      break;
+    case "number":
+      checkNumber();
+      break;
+    case "date":
+      checkDate();
+      break;
+    case "pin":
+      checkPin();
+      break;
+  }
+});
 
-    cardholder.value = "";
-    cardNumber.value = "";
-    expiry[0].value = "";
-    expiry[1].value = "";
-    cvc.value = "";
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
 
-    expiryErrorMsg.innerHTML="*";
-});//
+  let validName = checkName(),
+    validNumber = checkNumber(),
+    validDate = checkDate(),
+    validPin = checkPin();
+
+  if (validName && validNumber && validDate && validPin) {
+    formWrapper.classList.add("hidden");
+    completeState.classList.remove("hidden");
+    btnSubmit.innerHTML = "Continue";
+  }
+});
